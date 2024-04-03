@@ -18,7 +18,12 @@ const User = sq.define('User',{
     phone: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        validate:[11,11],
+        validate:{
+            len:{
+                args:[11,11],
+                msg: "Phone number cannot be less or greater than 11"
+            }
+        },
         unique: true
     },
     password:{
@@ -32,7 +37,12 @@ const User = sq.define('User',{
     },
     nok_phone:{ //nok means next of kin
         type: DataTypes.INTEGER,
-        validate:[11,11],
+        validate:{
+            len:{
+                args:[11,11],
+                msg: "Phone number cannot be less or greater than 11"
+            }
+        },
     },
     nok_name: DataTypes.STRING,
     dob: DataTypes.DATEONLY
