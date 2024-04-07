@@ -1,7 +1,7 @@
 const {DataTypes} = require('sequelize')
-const {sq} = require('../db/conn')
+const {sequelizeInstance} = require('../db/conn')
 
-const Bus = sq.define('Bus',{
+const Bus = sequelizeInstance.define('Bus',{
     name:{
         type: DataTypes.STRING,
         allowNull: false

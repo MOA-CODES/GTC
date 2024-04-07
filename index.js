@@ -1,7 +1,8 @@
 require('dotenv').config()
 require('express-async-errors')
 
-const {sq, connectDB} = require('./db/conn')
+const {connectDB, sequelizeInstance}= require('./db/conn')
+
 const auth_R = require('./routes/Auth_R')
 
 const express = require('express')
@@ -19,7 +20,7 @@ const PORT = process.env.PORT || 3001
 
 connectDB()
 
-sq.sync()
+sequelizeInstance.sync()
 
 app.listen(PORT, ()=>{
     console.log(`listening on ${PORT}`)

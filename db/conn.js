@@ -1,13 +1,15 @@
-const {Sequelize} = require('sequelize')
+const Sequelize = require('sequelize')
 
-const sequelize = new Sequelize(process.env.PGSQL_DB_URI, {freezeTableName: true}) //
+const sequelizeInstance = new Sequelize(process.env.PGSQL_DB_URI, {freezeTableName: true}) //
 
-const connectDB = async() =>{
+const connectDB = async()=>{
     try{
-       return await sequelize.authenticate().then(()=>console.log('Connection has been established successfully.'))
-    } catch(e){
+        return await sequelizeInstance.authenticate().then(()=>console.log("Connection has been established successfully"))
+    }catch(e){
         console.log("Unable to connect to the database").then(()=>process.exit(1))
     }
 }
 
-module.exports = {sq:sequelize, connectDB }
+
+module.exports ={connectDB, sequelizeInstance}
+
