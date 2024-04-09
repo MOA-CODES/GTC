@@ -1,6 +1,10 @@
 const {DataTypes} = require('sequelize')
 const {sequelizeInstance} = require('../db/conn') //ill get my sequelize instance from db
 
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken');
+const { use } = require('express/lib/router');
+
 const User = sequelizeInstance.define('User',{
         fullname:{
             type: DataTypes.STRING,
@@ -44,9 +48,30 @@ const User = sequelizeInstance.define('User',{
                 }
             },
         },
+        // token:{
+        //     type: DataTypes.STRING,
+        //     unique: true,
+        // },
         nok_name: DataTypes.STRING,
         dob: DataTypes.DATEONLY
         
 });
+
+User.beforeCreate(async(user)=>{ //like presave in mongodb
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(user.password, salt)
+})
+
+User.prototype.createJWT = async function(){
+    const token = await jwt.sign({phone: this.phone},process.env.KEY,{expiresIn:process.env.TIME})
+    // this.token = token; // I don't need to save my tokens
+    // await this.save()
+    return token
+ }
+
+User.prototype.comparePassword = async function(userPassword, options){
+    const compare = await bcrypt.compare(userPassword, this.password)
+    return compare
+}
 
  module.exports = User
