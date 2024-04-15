@@ -4,7 +4,7 @@ const errorHandler = (err, req, res, next) => {
     let customError = {
         msg: err.message || 'Something went wrong try again later',
         statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-        name: err.name
+        name: err.errname || err.name
     }
 
     if(err.code === 11000){

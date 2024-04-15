@@ -22,7 +22,7 @@ const auth = async(req, res, next) =>{
 
     try{
         const payload = jwt.verify(token, process.env.KEY)
-        req.user = {phone: payload.phone,token}
+        req.user = {phone: payload.phone, email: payload.email,token}
         next()
     }catch(e){
         throw new customError('Authentication Invalid', StatusCodes.UNAUTHORIZED)

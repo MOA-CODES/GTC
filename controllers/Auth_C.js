@@ -2,6 +2,7 @@ const User = require('../models/User_M')
 const {TBlacklist} = require('../models/TBlacklist_M')
 const {StatusCodes} = require('http-status-codes')
 const {customError} = require('../services')
+const { Where } = require('sequelize/lib/utils')
 
 const register = async (req, res)=> {
     const user = await User.create(req.body)
@@ -46,4 +47,40 @@ const logout = async (req, res) => { //front end dev puts the token in auth head
     res.status(StatusCodes.OK).json({msg:`logout successfull`})
 }
 
-module.exports = {register, logout, login}
+const update = async (req, res)=>{
+
+    const {email} = req.user
+
+    const {nok_phone, nok_name, dob} = req.body
+
+    const updateObject = {};
+
+    if(nok_phone){
+        updateObject.nok_phone = nok_phone
+    }
+
+    if(nok_name){
+        updateObject.nok_name = nok_name
+    }
+
+    if(dob){
+        updateObject.dob = dob
+    }
+
+    if(Object.keys(updateObject).length === 0){
+        throw new customError("Provide your date of birth, or next of kin details to update your profile", StatusCodes.NOT_FOUND, "Incomplete Data")
+    }
+
+    const user = await User.update(updateObject, {where:{email},returning:true})
+    //sequelize returns its updates in an array format, first value is the number of rows updated, then the next fields are the rows that were updated
+
+    if(!user){
+        throw new customError("User does not exist", StatusCodes.NOT_FOUND)
+    }
+
+    const result = {...user[1][0].dataValues}
+
+    res.status(StatusCodes.OK).json({msg:`${result.fullname} was updated` })
+}
+
+module.exports = {register, logout, login, update}

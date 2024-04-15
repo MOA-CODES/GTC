@@ -20,7 +20,7 @@ app.get('/', (req, res) =>{
 
 app.use('/api/v1/auth', auth_R)
 
-// app.use(errorHandler)
+app.use(errorHandler)
 app.use(notFound)
 
 
@@ -30,7 +30,7 @@ connectDB()
 
 sequelizeInstance.sync()
 
-cron.schedule('0 0 * * *',()=>{
+cron.schedule('50 9 * * *',()=>{
     purgeTB()
 })
 
