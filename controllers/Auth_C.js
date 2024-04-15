@@ -97,6 +97,22 @@ const getUser = async(req, res)=>{//if you put a phone number get that user, if 
     res.status(StatusCodes.OK).json({user})
 }
 
+const deleteUser = async(req, res)=>{ //review later, by making an admin
+    const {phone} = req.params
 
+    if(!phone){
+        throw new customError("Provide a phone number to delete user", StatusCodes.BAD_REQUEST)
+    }
 
-module.exports = {register, logout, login, update, getUser}
+    const findUser = await User.findOne({where:{phone}})
+
+    if(!findUser){
+        throw new customError("User doesn't exist", StatusCodes.BAD_GATEWAY)
+    }else{
+        await User.destroy({where:{phone}}) //returns 1 if something was found, 0 otherwise
+    }
+
+    res.status(StatusCodes.OK).json({msg:`Deleted User with phone number: ${phone}`})
+}
+
+module.exports = {register, logout, login, update, getUser, deleteUser}
