@@ -3,7 +3,6 @@ const {sequelizeInstance} = require('../db/conn') //ill get my sequelize instanc
 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
-const { use } = require('express/lib/router');
 
 const User = sequelizeInstance.define('User',{
         fullname:{

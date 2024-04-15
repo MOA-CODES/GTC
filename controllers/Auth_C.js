@@ -2,7 +2,6 @@ const User = require('../models/User_M')
 const {TBlacklist} = require('../models/TBlacklist_M')
 const {StatusCodes} = require('http-status-codes')
 const {customError} = require('../services')
-const { Where } = require('sequelize/lib/utils')
 
 const register = async (req, res)=> {
     const user = await User.create(req.body)
@@ -83,4 +82,21 @@ const update = async (req, res)=>{
     res.status(StatusCodes.OK).json({msg:`${result.fullname} was updated` })
 }
 
-module.exports = {register, logout, login, update}
+const getUser = async(req, res)=>{//if you put a phone number get that user, if you dont get all users
+
+    const {phone} = req.body 
+
+    let user;
+
+    if(phone){
+         user = await User.findOne({where:{phone},attributes:{exclude:['password']}})
+    }else{
+        user = await User.findAll({attributes:["fullname","email","phone",],})
+    }
+
+    res.status(StatusCodes.OK).json({user})
+}
+
+
+
+module.exports = {register, logout, login, update, getUser}
