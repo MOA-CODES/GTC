@@ -1,6 +1,9 @@
 const {DataTypes} = require('sequelize')
 const {sequelizeInstance} = require('../db/conn')
 const {v4:uuidv4} = require('uuid')
+const { validate } = require('node-cron')
+
+const pTerminals = ['Lagos_T','Abuja_T','PortHarcourt_T','Ekiti_T']
 
 const Bus = sequelizeInstance.define('Bus',{
     id:{
@@ -10,11 +13,23 @@ const Bus = sequelizeInstance.define('Bus',{
         defaultValue:() => uuidv4()
     },
     brand:{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('KIA','BENZ','FERRARI','BUGGATTI','TOYOTA'),
+        validate:{
+            isIn:{
+                args:['KIA','BENZ','FERRARI','BUGGATTI','TOYOTA'],
+                msg:'{VALUE} is not supported'
+            }
+        },
         allowNull: false
     },
     destination:{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Lagos','Abuja','PortHarcourt','Ekiti'),
+        validate:{
+            isIn:{
+                args:['Lagos','Abuja','PortHarcourt','Ekiti'],
+                msg:'{VALUE} is not supported'
+            }
+        },
         allowNull: false
     },
     departureDate:{
@@ -22,7 +37,13 @@ const Bus = sequelizeInstance.define('Bus',{
         allowNull: false
     },
     terminal:{
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('Lagos_T','Abuja_T','PortHarcourt_T','Ekiti_T'),
+        validate:{
+            isIn:{
+                args:[pTerminals],
+                msg:'{VALUE} is not supported'
+            }
+        },
         allowNull: false
     },
     priceChild:{
@@ -34,7 +55,14 @@ const Bus = sequelizeInstance.define('Bus',{
         allowNull: false
     },
     roundTrip:DataTypes.BOOLEAN, //if true destination terminal is available
-    destinationTerminal: DataTypes.STRING
+    destinationTerminal:{ 
+    type: DataTypes.ENUM('Lagos_T','Abuja_T','PortHarcourt_T','Ekiti_T'),
+    validate:{
+        isIn:{
+            args:[pTerminals],
+            msg:'{VALUE} is not supported'
+        }
+    },}
 })
 
 module.exports = Bus

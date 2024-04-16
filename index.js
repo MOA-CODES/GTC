@@ -5,6 +5,8 @@ const {connectDB, sequelizeInstance}= require('./db/conn')
 const {purgeTB} = require('./models/TBlacklist_M')
 
 const auth_R = require('./routes/Auth_R')
+const bus_R = require('./routes/Bus_R')
+
 
 const {errorHandler, notFound} = require('./services')
 
@@ -19,6 +21,8 @@ app.get('/', (req, res) =>{
 })
 
 app.use('/api/v1/auth', auth_R)
+app.use('/api/v1/bus', bus_R)
+
 
 app.use(errorHandler)
 app.use(notFound)
