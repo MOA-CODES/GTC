@@ -50,6 +50,12 @@ const update = async (req, res)=>{
 
     const {email} = req.user
 
+    const finduser = await User.findOne({where:{email}})
+
+    if(!finduser){
+        throw new customError("User does not exist", StatusCodes.NOT_FOUND)
+    }
+
     const {nok_phone, nok_name, dob} = req.body
 
     const updateObject = {};
@@ -67,15 +73,11 @@ const update = async (req, res)=>{
     }
 
     if(Object.keys(updateObject).length === 0){
-        throw new customError("Provide your date of birth, or next of kin details to update your profile", StatusCodes.NOT_FOUND, "Incomplete Data")
+        throw new customError("Provide your date of birth, or next of kin details to update your profile", StatusCodes.BAD_REQUEST, "Incomplete Data")
     }
 
     const user = await User.update(updateObject, {where:{email},returning:true})
     //sequelize returns its updates in an array format, first value is the number of rows updated, then the next fields are the rows that were updated
-
-    if(!user){
-        throw new customError("User does not exist", StatusCodes.NOT_FOUND)
-    }
 
     const result = {...user[1][0].dataValues}
 
@@ -115,4 +117,10 @@ const deleteUser = async(req, res)=>{ //review later, by making an admin
     res.status(StatusCodes.OK).json({msg:`Deleted User with phone number: ${phone}`})
 }
 
-module.exports = {register, logout, login, update, getUser, deleteUser}
+const test = async(req, res)=>{
+    res.json(`nothing to test`)
+
+    //doing if(!user) only works on find and delete, doesn't work on update
+}
+
+module.exports = {register, logout, login, update, getUser, deleteUser, test}

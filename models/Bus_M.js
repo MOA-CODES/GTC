@@ -1,8 +1,15 @@
 const {DataTypes} = require('sequelize')
 const {sequelizeInstance} = require('../db/conn')
+const {v4:uuidv4} = require('uuid')
 
 const Bus = sequelizeInstance.define('Bus',{
-    name:{
+    id:{
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        defaultValue:() => uuidv4()
+    },
+    brand:{
         type: DataTypes.STRING,
         allowNull: false
     },
