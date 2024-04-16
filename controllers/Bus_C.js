@@ -7,7 +7,7 @@ const createBus = async (req, res) =>{
 
     const bus = await Bus.create(req.body)
 
-    return res.status(StatusCodes.OK).json({msg:`Bus routing from ${bus.terminal} to ${bus.destination} created `})
+    return res.status(StatusCodes.OK).json({msg:`Bus routing from ${bus.terminal} to ${bus.destination} created `, bus})
 }
 
 const getBus = async (req, res) =>{
@@ -87,8 +87,6 @@ const updateBus = async (req, res) =>{
 }
 
 const deleteBus = async (req, res) =>{
-    //implement later delete by id or all that have x values
-
     const {id} = req.params 
 
     if(!id){
@@ -101,7 +99,60 @@ const deleteBus = async (req, res) =>{
         throw new customError("bus does not exist", StatusCodes.BAD_REQUEST)
     }
     
-    res.json(StatusCodes.OK).json({msg:`Deleted Bus with id ${id}`})
+    res.status(StatusCodes.OK).json({msg:`Deleted Bus with id ${id}`})
 }
 
-module.exports = {createBus, getBus, updateBus, deleteBus}
+const deleteBus2 = async (req, res) =>{
+    //implemented delete by id or all that have x values, and it has a more readable response
+    //a request with a id takes the highest precedence
+
+    const {id, brand, destination, departureDate, terminal, priceChild, priceAdult,roundTrip, destinationTerminal } = req.body 
+
+    const updateObject = {}
+
+    if(brand){
+        updateObject.brand = brand
+    }
+    if(destination){
+        updateObject.destination = destination
+    }
+    if(departureDate){
+        updateObject.departureDate = departureDate
+    }
+    if(terminal){
+        updateObject.terminal = terminal
+    }
+    if(priceChild){
+        updateObject.priceChild = priceChild
+    }
+    if(priceAdult){
+        updateObject.priceAdult = priceAdult
+    }
+    if(roundTrip){
+        updateObject.roundTrip = roundTrip
+    }
+    if(destinationTerminal){
+        updateObject.destinationTerminal = destinationTerminal
+    }
+
+    let bus;let informer;
+    
+    if(id){
+        bus = await Bus.destroy({where: {id}});
+        informer = "id " + id
+    }else if(!(Object.keys(updateObject).length === 0)){
+        bus = await Bus.destroy({where: updateObject})
+        informer = JSON.stringify(updateObject).replace(/["{}]/g, ' ').trim()
+        console.log(informer)
+    }else{
+        throw new customError("provide a bus id or other bus fields to delete buses", StatusCodes.BAD_REQUEST)
+    }
+
+    if(!bus){
+        throw new customError("bus does not exist", StatusCodes.BAD_REQUEST)
+    }
+    
+    res.status(StatusCodes.OK).json({msg:`Deleted Buses with, ${informer}.`})
+}
+
+module.exports = {createBus, getBus, updateBus, deleteBus, deleteBus2}

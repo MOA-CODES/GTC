@@ -16,8 +16,8 @@ const Bus = sequelizeInstance.define('Bus',{
         type: DataTypes.ENUM('KIA','BENZ','FERRARI','BUGGATTI','TOYOTA'),
         validate:{
             isIn:{
-                args:['KIA','BENZ','FERRARI','BUGGATTI','TOYOTA'],
-                msg:'{VALUE} is not supported'
+                args:[['KIA','BENZ','FERRARI','BUGGATTI','TOYOTA']],
+                msg:'brand {VALUE} is not supported'
             }
         },
         allowNull: false
@@ -26,14 +26,14 @@ const Bus = sequelizeInstance.define('Bus',{
         type: DataTypes.ENUM('Lagos','Abuja','PortHarcourt','Ekiti'),
         validate:{
             isIn:{
-                args:['Lagos','Abuja','PortHarcourt','Ekiti'],
-                msg:'{VALUE} is not supported'
+                args:[['Lagos','Abuja','PortHarcourt','Ekiti']],
+                msg:'destination {VALUE} is not supported'
             }
         },
         allowNull: false
     },
     departureDate:{
-        type:DataTypes.DATE,
+        type:DataTypes.DATEONLY,
         allowNull: false
     },
     terminal:{
@@ -54,14 +54,17 @@ const Bus = sequelizeInstance.define('Bus',{
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    roundTrip:DataTypes.BOOLEAN, //if true destination terminal is available
+    roundTrip:{ //if true destination terminal is available
+        type:DataTypes.BOOLEAN,
+        defaultValue:false,
+    },
     destinationTerminal:{ 
-    type: DataTypes.ENUM('Lagos_T','Abuja_T','PortHarcourt_T','Ekiti_T'),
-    validate:{
-        isIn:{
-            args:[pTerminals],
-            msg:'{VALUE} is not supported'
-        }
+        type: DataTypes.ENUM('Lagos_T','Abuja_T','PortHarcourt_T','Ekiti_T'),
+        validate:{
+            isIn:{
+                args:[pTerminals],
+                msg:'{VALUE} is not supported'
+            }
     },}
 })
 
