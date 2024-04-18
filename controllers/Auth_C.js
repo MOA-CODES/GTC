@@ -35,7 +35,7 @@ const login = async (req, res) => {
     }
 
     const token = await user.createJWT()
-    res.status(StatusCodes.OK).json({msg:"login successfull", token})
+    res.status(StatusCodes.OK).json({msg:`${user.role} login successfull`, token})
 }
 
 const logout = async (req, res) => { //front end dev puts the token in auth header after login or registration
@@ -84,16 +84,58 @@ const update = async (req, res)=>{
     res.status(StatusCodes.OK).json({msg:`${result.fullname} was updated` })
 }
 
+const updateRole = async (req, res) => {
+
+    const {email, role} = req.body
+
+    if(!(email && role)) {
+        throw new customError('email and role are required to update role', StatusCodes.BAD_REQUEST, "Hierachy error" )
+    }
+
+    const findOwners = await User.findAll({where:{role:"Owner"}})
+
+    if(role === 'Owner' && findOwners.length >= 1){
+        throw new customError("There can't be more than one owner", StatusCodes.NOT_FOUND)
+    }
+
+    const findUser = await User.findOne({where:{email}})
+
+    if(!findUser){
+        throw new customError('user does not exist', StatusCodes.NOT_FOUND)
+    }
+    const updateObject = {email, role}
+
+    const updateUser = await User.update(updateObject, {where:{email},returning:true})
+
+    const result = {...updateUser[1][0].dataValues}
+
+    res.status(StatusCodes.OK).json({msg:`updated ${result.fullname}, role`, updateUser})
+
+}
+
 const getUser = async(req, res)=>{//if you put a phone number get that user, if you dont get all users
 
     const {phone} = req.body 
+    const {role} = req.user
 
     let user;
 
     if(phone){
-         user = await User.findOne({where:{phone},attributes:{exclude:['password']}})
+      switch (role){
+        case 'Client':
+            user = await User.findOne({where:{phone,role},attributes:{exclude:['password']}});
+            break;
+        default:
+            user = await User.findOne({where:{phone},attributes:{exclude:['password']}})
+      }
     }else{
-        user = await User.findAll({attributes:["fullname","email","phone",],})
+        switch (role){
+            case 'Client':
+                user = await User.findAll({where:{role},attributes:["fullname","email","phone",],})
+                break;
+            default:
+                user = await User.findAll({attributes:{exclude:["password"]}})
+            }  
     }
 
     res.status(StatusCodes.OK).json({user})
@@ -101,6 +143,7 @@ const getUser = async(req, res)=>{//if you put a phone number get that user, if 
 
 const deleteUser = async(req, res)=>{ //review later, by making an admin
     const {phone} = req.params
+    const {password} = req.body
 
     if(!phone){
         throw new customError("Provide a phone number to delete user", StatusCodes.BAD_REQUEST)
@@ -110,6 +153,18 @@ const deleteUser = async(req, res)=>{ //review later, by making an admin
 
     if(!findUser){
         throw new customError("User doesn't exist", StatusCodes.BAD_GATEWAY)
+    }else if(findUser.role === "Owner"){
+        if(!password){
+            throw new customError("Password is needed for this action", StatusCodes.BAD_REQUEST)
+        }
+
+        const compare = await findUser.comparePassword(password)
+
+        if(!compare){
+            throw new customError("Password for current Owner is false", StatusCodes.UNAUTHORIZED,"Permission error")
+        }
+
+        await User.destroy({where:{phone}})
     }else{
         await User.destroy({where:{phone}}) //returns 1 if something was found, 0 otherwise
     }
@@ -118,9 +173,27 @@ const deleteUser = async(req, res)=>{ //review later, by making an admin
 }
 
 const test = async(req, res)=>{
-    res.json(`nothing to test`)
 
-    //doing if(!user) only works on find and delete, doesn't work on update
+    const {email, role} = req.body
+
+    if(!(email && role)) {
+        throw new customError('email and role are required to update role', StatusCodes.BAD_REQUEST )
+    }
+
+    const findUser = await User.findOne({where: {email}})
+
+    if(!findUser){
+        throw new customError('user does not exist', StatusCodes.NOT_FOUND)
+    }
+
+    const updateObject = {email, role}
+
+    const updateUser = User.update(updateObject, {where:{email},returning:true})
+
+    const result = {...user[1][0].dataValues}
+
+    res.status(StatusCodes.OK).json({msg:`updated ${result.fullname}, role`, updateUser})
+
 }
 
-module.exports = {register, logout, login, update, getUser, deleteUser, test}
+module.exports = {register, logout, login, update, updateRole, getUser, deleteUser, test}
