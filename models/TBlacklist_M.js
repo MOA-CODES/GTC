@@ -16,7 +16,7 @@ const TBlacklist = sequelizeInstance.define('TBlacklist',{
 
 TBlacklist.beforeCreate(async(tb)=>{
     const currentdate = new Date()
-    currentdate.setMinutes(currentdate.getMinutes() + 10)
+    currentdate.setMinutes(currentdate.getMinutes() + process.env.TIME)
     tb.deleteAt = currentdate
 })
 

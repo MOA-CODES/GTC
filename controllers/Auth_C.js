@@ -109,7 +109,7 @@ const updateRole = async (req, res) => {
 
     const result = {...updateUser[1][0].dataValues}
 
-    res.status(StatusCodes.OK).json({msg:`updated ${result.fullname}, role`, updateUser})
+    res.status(StatusCodes.OK).json({msg:`updated ${result.fullname}, role to ${result.role}`, updateUser})
 
 }
 
@@ -152,7 +152,7 @@ const deleteUser = async(req, res)=>{ //review later, by making an admin
     const findUser = await User.findOne({where:{phone}})
 
     if(!findUser){
-        throw new customError("User doesn't exist", StatusCodes.BAD_GATEWAY)
+        throw new customError("User doesn't exist", StatusCodes.BAD_REQUEST)
     }else if(findUser.role === "Owner"){
         if(!password){
             throw new customError("Password is needed for this action", StatusCodes.BAD_REQUEST)

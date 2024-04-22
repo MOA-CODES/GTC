@@ -68,8 +68,6 @@ User.beforeCreate(async(user)=>{ //like presave in mongodb
 
 User.prototype.createJWT = async function(){
     const token = await jwt.sign({role: this.role, phone: this.phone, email: this.email},process.env.KEY,{expiresIn:process.env.TIME})
-    // this.token = token; // I don't need to save my tokens
-    // await this.save()
     return token
 }
 

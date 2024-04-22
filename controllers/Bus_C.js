@@ -3,8 +3,6 @@ const {StatusCodes} = require('http-status-codes')
 const {customError} = require('../services')
 
 const createBus = async (req, res) =>{
-    const {brand, destination,departureDate,terminal,priceChild,priceAdult} = req.body
-
     const bus = await Bus.create(req.body)
 
     return res.status(StatusCodes.OK).json({msg:`Bus routing from ${bus.terminal} to ${bus.destination} created `, bus})
@@ -149,7 +147,7 @@ const deleteBus2 = async (req, res) =>{
     }
 
     if(!bus){
-        throw new customError("bus does not exist", StatusCodes.BAD_REQUEST)
+        throw new customError("bus does not exist", StatusCodes.NOT_FOUND)
     }
     
     res.status(StatusCodes.OK).json({msg:`Deleted Buses with, ${informer}.`})
