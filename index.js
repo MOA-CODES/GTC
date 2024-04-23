@@ -10,6 +10,8 @@ const bus_R = require('./routes/Bus_R')
 
 const {errorHandler, notFound} = require('./services')
 
+const {ManageOwner} = require('./utils')
+
 const cron = require('node-cron')
 const express = require('express')
 const app = express()
@@ -31,6 +33,8 @@ app.use(notFound)
 const PORT = process.env.PORT || 3001
 
 connectDB()
+
+ManageOwner()
 
 sequelizeInstance.sync()
 

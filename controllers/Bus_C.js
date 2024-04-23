@@ -25,13 +25,20 @@ const getBus = async (req, res) =>{
         queryObject.departureDate = departureDate;
     }
 
+    console.log(queryObject)
+
     if(destinationTerminal){
         queryObject.destinationTerminal = destinationTerminal;
-        bus = await Bus.findAll({where:{queryObject},attributes:{exclude: ['roundTrip']}})
+        bus = await Bus.findAll({where:queryObject,attributes:{exclude: ['roundTrip']}})
     }else if(Object.keys(queryObject).length === 0){
         bus = await Bus.findAll({})
     }else{
-        bus = await Bus.findAll({where:{queryObject},attributes:{exclude: ['roundTrip', 'destinationTerminal']}})
+        try {
+            bus = await Bus.findAll({where:queryObject,attributes:{exclude: ['roundTrip', 'destinationTerminal']}})
+            
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     res.status(StatusCodes.OK).json({no:bus.length,bus})

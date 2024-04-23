@@ -6,7 +6,7 @@ const {createBus, getBus, updateBus, deleteBus, deleteBus2} = require ('../contr
 
 router.post('/create', auth, Rolecheck(['Admin','Owner']), createBus)
 
-router.get('/getbus', auth, getBus)
+router.get('/getbus', getBus)
 
 router.put('/update/:id', auth, Rolecheck(['Admin','Owner']), updateBus)
 
