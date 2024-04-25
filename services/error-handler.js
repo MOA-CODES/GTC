@@ -16,6 +16,17 @@ const errorHandler = (err, req, res, next) => {
         customError.name = 'Duplicate key error'
     }
 
+    if(err.details){
+        const property = err.details[0].path//the property or properties that are not needed or specified in the joi validation schema
+
+        customError.msg = err.details[0].message
+        customError.name = 'Validation error'
+        customError.statusCode = StatusCodes.BAD_REQUEST
+    }
+
+    console.log(err)
+
+    // return res.status(customError.statusCode).send({err})
     return res.status(customError.statusCode).send({error:{name: customError.name,msg:customError.msg}})
 }
 

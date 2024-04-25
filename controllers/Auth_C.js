@@ -2,13 +2,15 @@ const User = require('../models/User_M')
 const {TBlacklist} = require('../models/TBlacklist_M')
 const {StatusCodes} = require('http-status-codes')
 const {customError} = require('../services')
+const bcrypt = require('bcryptjs')
+
 
 const register = async (req, res)=> {
     const user = await User.create(req.body)
 
     const token = await user.createJWT()
 
-    return res.status(StatusCodes.CREATED).json({msg:`User- ${user.fullname}, created successfully`,token})
+    return res.status(StatusCodes.CREATED).json({msg:`User- ${user.fullname}, created successfully`,id:user.id, token})
 }
 
 const login = async (req, res) => {
@@ -46,17 +48,19 @@ const logout = async (req, res) => { //front end dev puts the token in auth head
     res.status(StatusCodes.OK).json({msg:`logout successfull`})
 }
 
-const update = async (req, res)=>{
-
+const update = async (req, res)=>{ //update a single user
     const {email} = req.user
+    const {nok_phone, nok_name, dob} = req.body
+
+    if(!email){
+        throw new customError("Provide an Email address", StatusCodes.BAD_REQUEST)
+    }
 
     const finduser = await User.findOne({where:{email}})
 
     if(!finduser){
         throw new customError("User does not exist", StatusCodes.NOT_FOUND)
     }
-
-    const {nok_phone, nok_name, dob} = req.body
 
     const updateObject = {};
 
@@ -73,7 +77,7 @@ const update = async (req, res)=>{
     }
 
     if(Object.keys(updateObject).length === 0){
-        throw new customError("Provide your date of birth, or next of kin details to update your profile", StatusCodes.BAD_REQUEST, "Incomplete Data")
+        throw new customError("Provide your date of birth, next of kin phone or name to update this profile", StatusCodes.BAD_REQUEST, "Incomplete Data")
     }
 
     const user = await User.update(updateObject, {where:{email},returning:true})
@@ -142,8 +146,8 @@ const getUser = async(req, res)=>{//if you put a phone number get that user, if 
 }
 
 const deleteUser = async(req, res)=>{ //review later, by making an admin
-    const {phone} = req.params
-    const {password} = req.body
+    // const {phone} = req.params
+    const {phone, password} = req.body
 
     if(!phone){
         throw new customError("Provide a phone number to delete user", StatusCodes.BAD_REQUEST)
@@ -172,9 +176,47 @@ const deleteUser = async(req, res)=>{ //review later, by making an admin
     res.status(StatusCodes.OK).json({msg:`Deleted User with phone number: ${phone}`})
 }
 
+const forgotPassword = async(req, res)=>{
+
+    const {email, previousPassword, newPassword, confirmPassword} = req.body
+
+    if(!email){
+        throw new customError('Provide email address to change password')
+    }
+
+    const user = await User.findOne({where:{email}})
+
+    if(!user){
+        throw new customError('User does not exist', StatusCodes.NOT_FOUND)
+    }
+
+    const compare = await user.comparePassword(previousPassword)
+
+    if(!compare){
+        throw new customError('Previous password is incorrect', StatusCodes.UNAUTHORIZED)
+    }
+
+
+    if(newPassword === previousPassword){
+        throw new customError("new password can't be old password",StatusCodes.BAD_REQUEST)
+    }
+
+
+    if(newPassword === confirmPassword){
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(newPassword, salt)
+
+     await User.update({password: hashedPassword}, {where:{email},returning:true})
+    }else{
+        throw new customError("new passwords don't match", StatusCodes.BAD_REQUEST)
+    }
+
+    res.status(StatusCodes.OK).json({msg:`${user.fullname}'s password updated successfully`})
+}
+
 const test = async(req, res)=>{
 
-    const {email, role} = req.body
+   const {email, role} = req.body
 
     if(!(email && role)) {
         throw new customError('email and role are required to update role', StatusCodes.BAD_REQUEST )
@@ -196,4 +238,4 @@ const test = async(req, res)=>{
 
 }
 
-module.exports = {register, logout, login, update, updateRole, getUser, deleteUser, test}
+module.exports = {register, logout, login, update, updateRole, getUser, deleteUser, forgotPassword, test}

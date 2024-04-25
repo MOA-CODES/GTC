@@ -2,10 +2,17 @@ const {DataTypes} = require('sequelize')
 const {sequelizeInstance} = require('../db/conn') //ill get my sequelize instance from db
 const Booking = require('./Booking_M')
 
+const {v4:uuidv4} = require('uuid')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 
 const User = sequelizeInstance.define('User',{
+        id:{
+            type: DataTypes.UUID,
+            primaryKey: true,
+            allowNull: false,
+            defaultValue:() => uuidv4()
+        },
         fullname:{
             type: DataTypes.STRING,
             allowNull: false,
@@ -68,7 +75,8 @@ User.beforeCreate(async(user)=>{ //like presave in mongodb
 })
 
 User.prototype.createJWT = async function(){
-    const token = await jwt.sign({role: this.role, phone: this.phone, email: this.email},process.env.KEY,{expiresIn:process.env.TIME})
+    console.log(process.env.TOKENTIME)
+    const token = await jwt.sign({role: this.role, phone: this.phone, email: this.email, userid: this.id},process.env.KEY,{expiresIn:process.env.TOKENTIME})
     return token
 }
 
@@ -77,9 +85,13 @@ User.prototype.comparePassword = async function(userPassword, options){
     return compare
 }
 
-User.hasMany(Booking,{
-    foreignKey: 'userid',
-    as: 'boookings'
-})
+User.prototype.UpdatePassword = async function(){
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+}
+
+User.associate = (models) =>{
+    User.hasMany(models.Booking,{foriegnKey:'bookId'}) //'has many' refrences another model so take a column from that table as the fk
+}
 
 module.exports = User

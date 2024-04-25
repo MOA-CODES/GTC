@@ -5,7 +5,7 @@ const {customError} = require('../services')
 const createBus = async (req, res) =>{
     const bus = await Bus.create(req.body)
 
-    return res.status(StatusCodes.OK).json({msg:`Bus routing from ${bus.terminal} to ${bus.destination} created `, bus})
+    return res.status(StatusCodes.CREATED).json({msg:`Bus routing from ${bus.terminal} to ${bus.destination} created `, bus})
 }
 
 const getBus = async (req, res) =>{
@@ -111,7 +111,7 @@ const deleteBus2 = async (req, res) =>{
     //implemented delete by id or all that have x values, and it has a more readable response
     //a request with a id takes the highest precedence
 
-    const {id, brand, destination, departureDate, terminal, priceChild, priceAdult,roundTrip, destinationTerminal } = req.body 
+    const {id, brand, destination, departureDate, terminal, priceChild, priceAdult,roundTrip, destinationTerminal} = req.body 
 
     const updateObject = {}
 

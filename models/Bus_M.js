@@ -11,7 +11,7 @@ const Bus = sequelizeInstance.define('Bus',{
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-        // defaultValue:() => uuidv4()
+        defaultValue:() => uuidv4()
     },
     brand:{
         type: DataTypes.ENUM('KIA','BENZ','FERRARI','BUGGATTI','TOYOTA'),
@@ -70,10 +70,8 @@ const Bus = sequelizeInstance.define('Bus',{
 }
 });
 
-
-// Bus.hasMany(Booking,{
-//     foreignKey: 'busid',
-//     as: 'bookings'
-// })
+Bus.associate = (models) => {
+    Bus.hasMany(models.Booking,{foreignKey: "bookId"});//'has many' refrences another model so take a column from that table as the fk
+}
 
 module.exports = Bus

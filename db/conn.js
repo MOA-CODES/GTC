@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize')
 
-const sequelizeInstance = new Sequelize(process.env.PGSQL_DB_URI, {freezeTableName: true}) //
+const sequelizeInstance = new Sequelize(process.env.PGSQL_DB_URI) //
 
 const connectDB = async()=>{
     try{

@@ -1,9 +1,17 @@
-const {sequelizeInstance} = require('../db/conn')
 const {Sequelize, DataTypes} = require('sequelize')
+const {v4:uuidv4} = require('uuid')
+
+const {sequelizeInstance} = require('../db/conn')
+
 const op = Sequelize.Op
 
-
 const TBlacklist = sequelizeInstance.define('TBlacklist',{
+    id:{
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        defaultValue:() => uuidv4()
+    },
     token:{
         type: DataTypes.STRING,
         unique: true,
@@ -15,7 +23,7 @@ const TBlacklist = sequelizeInstance.define('TBlacklist',{
 })
 
 TBlacklist.beforeCreate(async(tb)=>{
-    const currentdate = new Date()
+    const currentdate = new Date();
     currentdate.setMinutes(currentdate.getMinutes() + process.env.TIME)
     tb.deleteAt = currentdate
 })
